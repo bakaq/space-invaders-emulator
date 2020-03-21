@@ -6,7 +6,7 @@
 #include "8080disas.hpp"
 
 // Debug mode
-const bool DEBUG = true;
+const bool DEBUG = false;
 
 int main(int argc, char* argv[]){
 	
@@ -47,7 +47,7 @@ int main(int argc, char* argv[]){
 	if(disas_flag){
 		unsigned int pc = 0;
 		while(pc < code_buffer.size()){
-			pc += disas8080op(code_buffer, pc);
+			pc += disas8080opf(code_buffer, pc);
 		}
 	}else{
 		// Run

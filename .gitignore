@@ -1,3 +1,4 @@
 rom/
 *.o
+*.swp
 /space_invaders
