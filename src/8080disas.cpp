@@ -275,7 +275,7 @@ std::string disas8080op(const std::vector<unsigned char> &code_buffer, int pc, i
 		case 0xBD: opcode = "CMP L"; break;
 		case 0xBE: opcode = "CMP M"; break;
 		case 0xBF: opcode = "CMP A"; break;
-
+		case 0xC0: opcode = "RNZ"; break;
 		case 0xC1: opcode = "POP B"; break;
 		case 0xC2: 
 			sprintf(fs, "JNZ $%02X%02X",code_buffer[pc+2], code_buffer[pc+1]);
@@ -287,15 +287,27 @@ std::string disas8080op(const std::vector<unsigned char> &code_buffer, int pc, i
 			opcode = fs;
 			opbytes = 3;
 			break;
+		case 0xC4: 
+			sprintf(fs, "CNZ $%02X%02X",code_buffer[pc+2], code_buffer[pc+1]);
+			opcode = fs;
+			opbytes = 3;
+			break;
 		case 0xC5: opcode = "PUSH B"; break;
 		case 0xC6:
-			sprintf(fs, "ADI $%02X", code_buffer[pc+1]);
+			sprintf(fs, "ADI #$%02X", code_buffer[pc+1]);
 			opcode = fs;
 			opbytes = 2;
 			break;
+		case 0xC7: opcode = "RST 0"; break;
+		case 0xC8: opcode = "RZ"; break;
 		case 0xC9: opcode = "RET"; break;
 		case 0xCA:
 			sprintf(fs, "JZ $%02X%02X",code_buffer[pc+2], code_buffer[pc+1]);
+			opcode = fs;
+			opbytes = 3;
+			break;
+		case 0xCC:
+			sprintf(fs, "CZ $%02X%02X",code_buffer[pc+2], code_buffer[pc+1]);
 			opcode = fs;
 			opbytes = 3;
 			break;
@@ -304,13 +316,37 @@ std::string disas8080op(const std::vector<unsigned char> &code_buffer, int pc, i
 			opcode = fs;
 			opbytes = 3;
 			break;
+		case 0xCE:
+			sprintf(fs, "ACI #$%02X", code_buffer[pc+1]);
+			opcode = fs;
+			opbytes = 2;
+			break;
+		case 0xCF: opcode = "RST 1"; break;
+		case 0xD0: opcode = "RNC"; break;
 		case 0xD1: opcode = "POP D"; break;
 		case 0xD2:
 			sprintf(fs, "JNC $%02X%02X",code_buffer[pc+2], code_buffer[pc+1]);
 			opcode = fs;
 			opbytes = 3;
 			break;
+		case 0xD3:
+			sprintf(fs, "OUT #$%02X", code_buffer[pc+1]);
+			opcode = fs;
+			opbytes = 2;
+			break;
+		case 0xD4:
+			sprintf(fs, "CNC $%02X%02X",code_buffer[pc+2], code_buffer[pc+1]);
+			opcode = fs;
+			opbytes = 3;
+			break;
 		case 0xD5: opcode = "PUSH D"; break;
+		case 0xD6:
+			sprintf(fs, "SUI #$%02X", code_buffer[pc+1]);
+			opcode = fs;
+			opbytes = 2;
+			break;
+		case 0xD7: opcode = "RST 2"; break;
+		case 0xD8: opcode = "RC"; break;
 		case 0xDA: 
 			sprintf(fs, "JC $%02X%02X",code_buffer[pc+2], code_buffer[pc+1]);
 			opcode = fs;
@@ -321,16 +357,95 @@ std::string disas8080op(const std::vector<unsigned char> &code_buffer, int pc, i
 			opcode = fs;
 			opbytes = 2;
 			break;
-		case 0xE1: opcode = "POP H"; break;
-		case 0xE5: opcode = "PUSH H"; break;
-		case 0xF1: opcode = "POP PSW"; break;
-		case 0xF5: opcode = "PUSH PSW"; break;
-		case 0xFB: opcode = "EI"; break;
-		case 0xFE:
-			sprintf(fs, "CPI $%02X", code_buffer[pc+1]);
+		case 0xDC: 
+			sprintf(fs, "CC $%02X%02X",code_buffer[pc+2], code_buffer[pc+1]);
+			opcode = fs;
+			opbytes = 3;
+			break;
+		case 0xDE: 
+			sprintf(fs, "SBI #$%02X", code_buffer[pc+1]);
 			opcode = fs;
 			opbytes = 2;
 			break;
+		case 0xDF: opcode = "RST 3"; break;
+		case 0xE0: opcode = "RPO"; break;
+		case 0xE1: opcode = "POP H"; break;
+		case 0xE2: 
+			sprintf(fs, "JPO $%02X%02X",code_buffer[pc+2], code_buffer[pc+1]);
+			opcode = fs;
+			opbytes = 3;
+			break;
+		case 0xE3: opcode = "XTHL"; break;
+		case 0xE4: 
+			sprintf(fs, "CPO $%02X%02X",code_buffer[pc+2], code_buffer[pc+1]);
+			opcode = fs;
+			opbytes = 3;
+			break;
+		case 0xE5: opcode = "PUSH H"; break;
+		case 0xE6: 
+			sprintf(fs, "ANI #$%02X", code_buffer[pc+1]);
+			opcode = fs;
+			opbytes = 2;
+			break;
+		case 0xE7: opcode = "RST 4"; break;
+		case 0xE8: opcode = "RPE"; break;
+		case 0xE9: opcode = "PCHL"; break;
+		case 0xEA: 
+			sprintf(fs, "JPE $%02X%02X",code_buffer[pc+2], code_buffer[pc+1]);
+			opcode = fs;
+			opbytes = 3;
+			break;
+		case 0xEB: opcode = "XCHG"; break;
+		case 0xEC: 
+			sprintf(fs, "CPE $%02X%02X",code_buffer[pc+2], code_buffer[pc+1]);
+			opcode = fs;
+			opbytes = 3;
+			break;
+		case 0xEE: 
+			sprintf(fs, "XRI #$%02X", code_buffer[pc+1]);
+			opcode = fs;
+			opbytes = 2;
+			break;
+		case 0xEF: opcode = "RST 5"; break;
+		case 0xF0: opcode = "RP"; break;
+		case 0xF1: opcode = "POP PSW"; break;
+		case 0xF2: 
+			sprintf(fs, "JP $%02X%02X",code_buffer[pc+2], code_buffer[pc+1]);
+			opcode = fs;
+			opbytes = 3;
+			break;
+		case 0xF3: opcode = "DI"; break;
+		case 0xF4: 
+			sprintf(fs, "CP $%02X%02X",code_buffer[pc+2], code_buffer[pc+1]);
+			opcode = fs;
+			opbytes = 3;
+			break;
+		case 0xF5: opcode = "PUSH PSW"; break;
+		case 0xF6: 
+			sprintf(fs, "ORI #$%02X", code_buffer[pc+1]);
+			opcode = fs;
+			opbytes = 2;
+			break;
+		case 0xF7: opcode = "RST 6"; break;
+		case 0xF8: opcode = "RM"; break;
+		case 0xF9: opcode = "SPHL"; break;
+		case 0xFA: 
+			sprintf(fs, "JM $%02X%02X",code_buffer[pc+2], code_buffer[pc+1]);
+			opcode = fs;
+			opbytes = 3;
+			break;
+		case 0xFB: opcode = "EI"; break;
+		case 0xFC: 
+			sprintf(fs, "CM $%02X%02X",code_buffer[pc+2], code_buffer[pc+1]);
+			opcode = fs;
+			opbytes = 3;
+			break;
+		case 0xFE:
+			sprintf(fs, "CPI #$%02X", code_buffer[pc+1]);
+			opcode = fs;
+			opbytes = 2;
+			break;
+		case 0xFF: opcode = "RST 7"; break;
 		default: opcode = "Not Implemented"; break;
 	}
 	return opcode;
