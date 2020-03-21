@@ -146,7 +146,7 @@ std::string disas8080op(const std::vector<unsigned char> &code_buffer, int pc, i
 			opcode = fs;
 			opbytes = 2;
 			break;
-		case 0x3F: opcode = "CMC"
+		case 0x3F: opcode = "CMC";
 		case 0x40: opcode = "MOV B, B"; break;
 		case 0x41: opcode = "MOV B, C"; break;
 		case 0x42: opcode = "MOV B, D"; break;
