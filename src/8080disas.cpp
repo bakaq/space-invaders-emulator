@@ -27,9 +27,28 @@ std::string disas8080op(const std::vector<unsigned char> &code_buffer, int pc, i
 	char fs[30];
 	switch(code_buffer[pc]){
 		case 0x00: opcode = "NOP"; break;
+		case 0x01: 
+			sprintf(fs, "LXI B, #$%02X%02X",code_buffer[pc+2], code_buffer[pc+1]);
+			opcode = fs;
+			opbytes = 3;
+			break;
+		case 0x02: opcode = "STAX B"; break;
+		case 0x03: opcode = "INX B"; break;
+		case 0x04: opcode = "INR B"; break;
 		case 0x05: opcode = "DCR B"; break;
 		case 0x06:
-			sprintf(fs, "MVI #$%02X", code_buffer[pc+1]);
+			sprintf(fs, "MVI B, #$%02X", code_buffer[pc+1]);
+			opcode = fs;
+			opbytes = 2;
+			break;
+		case 0x07: opcode = "RLC"; break;
+		case 0x09: opcode = "DAD B"; break;
+		case 0x0A: opcode = "LDAX B"; break;
+		case 0x0B: opcode = "DCX B"; break;
+		case 0x0C: opcode = "INR C"; break;
+		case 0x0D: opcode = "DCR C"; break;
+		case 0x0E: 
+			sprintf(fs, "MVI C, #$%02X", code_buffer[pc+1]);
 			opcode = fs;
 			opbytes = 2;
 			break;
@@ -39,8 +58,27 @@ std::string disas8080op(const std::vector<unsigned char> &code_buffer, int pc, i
 			opcode = fs;
 			opbytes = 3;
 			break;
+		case 0x12: opcode = "STAX D"; break;
 		case 0x13: opcode = "INX D"; break;
+		case 0x14: opcode = "INR D"; break;
+		case 0x15: opcode = "DCR D"; break;
+		case 0x16:
+			sprintf(fs, "MVI D, #$%02X", code_buffer[pc+1]);
+			opcode = fs;
+			opbytes = 2;
+			break;
+		case 0x17: opcode = "RAL"; break;
+		case 0x19: opcode = "DAD D"; break;
 		case 0x1A: opcode = "LDAX D"; break;
+		case 0x1B: opcode = "DCX D"; break;
+		case 0x1C: opcode = "INR E"; break;
+		case 0x1D: opcode = "DCR E"; break;
+		case 0x1E: 
+			sprintf(fs, "MVI E, #$%02X", code_buffer[pc+1]);
+			opcode = fs;
+			opbytes = 2;
+			break;
+		case 0x1F: opcode = "RAR"; break;
 		case 0x21: 
 			sprintf(fs, "LXI H, $%02X%02X",code_buffer[pc+2], code_buffer[pc+1]);
 			opcode = fs;
@@ -52,10 +90,31 @@ std::string disas8080op(const std::vector<unsigned char> &code_buffer, int pc, i
 			opbytes = 3;
 			break;
 		case 0x23: opcode = "INX H"; break;
+		case 0x24: opcode = "INR H"; break;
+		case 0x25: opcode = "DCR H"; break;
+		case 0x26: 
+			sprintf(fs, "MVI H, #$%02X", code_buffer[pc+1]);
+			opcode = fs;
+			opbytes = 2;
+			break;
 		case 0x27: opcode = "DAA"; break;
+		case 0x29: opcode = "DAD H"; break;
+		case 0x2A: 
+			sprintf(fs, "LHLD $%02X%02X",code_buffer[pc+2], code_buffer[pc+1]);
+			opcode = fs;
+			opbytes = 3;
+			break;
 		case 0x2B: opcode = "DCX H"; break;
+		case 0x2C: opcode = "INR L"; break;
+		case 0x2D: opcode = "DCR L"; break;
+		case 0x2E: 
+			sprintf(fs, "MVI L, #$%02X", code_buffer[pc+1]);
+			opcode = fs;
+			opbytes = 2;
+			break;
+		case 0x2F: opcode = "CMA"; break;
 		case 0x31:
-			sprintf(fs, "LXI #$%02X%02X",code_buffer[pc+2], code_buffer[pc+1]);
+			sprintf(fs, "LXI SP, #$%02X%02X",code_buffer[pc+2], code_buffer[pc+1]);
 			opcode = fs;
 			opbytes = 3;
 			break;
@@ -64,12 +123,22 @@ std::string disas8080op(const std::vector<unsigned char> &code_buffer, int pc, i
 			opcode = fs;
 			opbytes = 3;
 			break;
+		case 0x33: opcode = "INX SP"; break;
+		case 0x34: opcode = "INR M"; break;
 		case 0x35: opcode = "DCR M"; break;
+		case 0x36:
+			sprintf(fs, "MVI M, #$%02X", code_buffer[pc+1]);
+			opcode = fs;
+			opbytes = 2;
+			break;
+		case 0x37: opcode = "STC"; break;
+		case 0x39: opcode = "DAD SP"; break;
 		case 0x3A: 
 			sprintf(fs, "LDA $%02X%02X",code_buffer[pc+2], code_buffer[pc+1]);
 			opcode = fs;
 			opbytes = 3;
 			break;
+		case 0x3B: opcode = "DCX SP"; break;
 		case 0x3C: opcode = "INR A"; break;
 		case 0x3D: opcode = "DCR A"; break;
 		case 0x3E:
@@ -77,7 +146,7 @@ std::string disas8080op(const std::vector<unsigned char> &code_buffer, int pc, i
 			opcode = fs;
 			opbytes = 2;
 			break;
-
+		case 0x3F: opcode = "CMC"
 		case 0x40: opcode = "MOV B, B"; break;
 		case 0x41: opcode = "MOV B, C"; break;
 		case 0x42: opcode = "MOV B, D"; break;
