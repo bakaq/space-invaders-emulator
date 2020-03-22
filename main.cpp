@@ -2,11 +2,15 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <cstdint>
 
+#include "8080.hpp"
 #include "8080disas.hpp"
 
 // Debug mode
 const bool DEBUG = false;
+
+void execute(const std::vector<uint8_t> &code);
 
 int main(int argc, char* argv[]){
 	
@@ -41,7 +45,7 @@ int main(int argc, char* argv[]){
 		printf("Couldn't open file!\n");
 		return 1;
 	}
-	std::vector<unsigned char> code_buffer(std::istreambuf_iterator<char>(rf), {});
+	std::vector<uint8_t> code_buffer(std::istreambuf_iterator<char>(rf), {});
 
 	// Execute or disassembly
 	if(disas_flag){
@@ -51,8 +55,17 @@ int main(int argc, char* argv[]){
 		}
 	}else{
 		// Run
-		printf("Execution not yet implemented.\n");
+		execute(code_buffer);
 	}
 
 	return 0;
+}
+
+
+void execute(const std::vector<uint8_t> &code){
+	c8080 chip(code);
+	bool running = true;
+	while(running){
+		chip.cycle();
+	}
 }
