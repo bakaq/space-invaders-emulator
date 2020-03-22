@@ -6,7 +6,7 @@
 
 // A class for the 8080 chip
 class c8080{
-	private:
+	public:
 		// State
 		uint8_t a;
 		uint8_t b;

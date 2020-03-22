@@ -8,7 +8,7 @@
 #include "8080disas.hpp"
 
 // Debug mode
-const bool DEBUG = false;
+bool DEBUG = false;
 
 void execute(const std::vector<uint8_t>& code);
 
@@ -24,6 +24,8 @@ int main(int argc, char* argv[]){
 	for(int i = 1; i < argc; ++i){
 		if(std::string(argv[i]) == "-d"){
 			disas_flag = true;
+		}else if(std::string(argv[i]) == "-D"){
+			DEBUG = true;
 		}else{
 			rom_name = std::string(argv[i]);
 		}
@@ -66,6 +68,16 @@ void execute(const std::vector<uint8_t>& code){
 	c8080 chip(code);
 	bool running = true;
 	while(running){
-		chip.cycle();
+		if(DEBUG){
+			int itt = 0;
+			printf("A: %02X BC: %04X DE: %04X HL: %04X\n", chip.a, (chip.b<<8) | chip.c, (chip.d << 8) | chip.e, (chip.h << 8) | chip.l);
+			printf("Iterations: ");
+			scanf("%d", &itt);
+			for(int i = 0; i < itt; ++i){
+				chip.cycle();
+			}
+		}else{
+			chip.cycle();
+		}
 	}
 }
