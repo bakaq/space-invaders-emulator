@@ -10,7 +10,7 @@
 // Debug mode
 const bool DEBUG = false;
 
-void execute(const std::vector<uint8_t> &code);
+void execute(const std::vector<uint8_t>& code);
 
 int main(int argc, char* argv[]){
 	
@@ -62,7 +62,7 @@ int main(int argc, char* argv[]){
 }
 
 
-void execute(const std::vector<uint8_t> &code){
+void execute(const std::vector<uint8_t>& code){
 	c8080 chip(code);
 	bool running = true;
 	while(running){

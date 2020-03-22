@@ -4,9 +4,9 @@
 #include <cstdlib>
 
 #include "8080.hpp"
+#include "8080disas.hpp"
 
-
-c8080::c8080(const std::vector<uint8_t> &code){
+c8080::c8080(const std::vector<uint8_t>& code){
 	// Initialize state
 	this->a = 0;
 	this->b = 0;
@@ -26,17 +26,25 @@ c8080::c8080(const std::vector<uint8_t> &code){
 	
 	this->memory = std::vector<uint8_t>(0x10000, 0);
 	for(unsigned int i = 0; i < code.size(); ++i){
-		memory[i] = code[i];
+		this->memory[i] = code[i];
 	}
 }
 
 
 void c8080::cycle(){
-	uint8_t op = this->memory[this->pc];
+	std::vector<uint8_t>& mem = this->memory;
+	uint16_t& pc = this->pc;
+
+	uint8_t op = mem[pc];
+	disas8080opf(mem, pc);
 	switch(op){
+		case 0x00: break; // NOP
+		case 0xC3: // JMP adr
+			pc = ((mem[pc+2] << 8) | mem[pc+1]) - 1; 
+			break;
 		default:
-			printf("Instruction not implemented.\n");
+			printf("Instruction not implemented!\n");
 			exit(1);
 	}
-	this->pc += 1;
+	pc += 1;
 }

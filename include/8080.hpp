@@ -29,7 +29,7 @@ class c8080{
 	
 	public:
 		void cycle();
-		c8080(const std::vector<uint8_t> &code);
+		c8080(const std::vector<uint8_t>& code);
 };
 
 

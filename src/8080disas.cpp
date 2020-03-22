@@ -6,7 +6,7 @@
 
 
 
-int disas8080opf(const std::vector<unsigned char> &code_buffer, int pc){
+int disas8080opf(const std::vector<unsigned char>& code_buffer, int pc){
 	int opbytes = 1;
 	std::string opcode = disas8080op(code_buffer, pc, opbytes); 
 	printf("%04X: ", pc);
@@ -22,7 +22,7 @@ int disas8080opf(const std::vector<unsigned char> &code_buffer, int pc){
 }
 
 
-std::string disas8080op(const std::vector<unsigned char> &code_buffer, int pc, int &opbytes){
+std::string disas8080op(const std::vector<unsigned char>& code_buffer, int pc, int& opbytes){
 	std::string opcode = "";
 	char fs[30];
 	switch(code_buffer[pc]){
