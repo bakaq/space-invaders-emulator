@@ -70,7 +70,7 @@ void execute(const std::vector<uint8_t>& code){
 	while(running){
 		if(DEBUG){
 			int itt = 0;
-			printf("A: %02X BC: %04X DE: %04X HL: %04X\n", chip.a, (chip.b<<8) | chip.c, (chip.d << 8) | chip.e, (chip.h << 8) | chip.l);
+			printf(chip.get_state().c_str());
 			printf("Iterations: ");
 			scanf("%d", &itt);
 			for(int i = 0; i < itt; ++i){

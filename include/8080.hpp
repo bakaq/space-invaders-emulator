@@ -3,10 +3,11 @@
 
 #include <vector>
 #include <cstdint>
+#include <string>
 
 // A class for the 8080 chip
 class c8080{
-	public:
+	private:
 		// State
 		uint8_t a;
 		uint8_t b;
@@ -29,6 +30,8 @@ class c8080{
 	
 	public:
 		void cycle();
+		void write_mem(uint16_t addr, uint8_t val);
+		std::string get_state();
 		c8080(const std::vector<uint8_t>& code);
 };
 
