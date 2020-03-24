@@ -31,6 +31,7 @@ class c8080{
 	//public:
 		void cycle();
 		void write_mem(uint16_t addr, uint8_t val);
+		void gen_interrupt(int interrupt_num);
 		std::string get_state();
 		c8080(const std::vector<uint8_t>& code);
 };

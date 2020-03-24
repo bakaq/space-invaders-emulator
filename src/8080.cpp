@@ -31,6 +31,17 @@ c8080::c8080(const std::vector<uint8_t>& code){
 	}
 }
 
+void c8080::gen_interrupt(int interrupt_num){
+	// Push pc
+	write_mem(this->sp-1, ((this->pc-1) & 0xFF00) >> 8);
+	write_mem(this->sp-2, ((this->pc-1) & 0x00FF));
+	this->sp -= 2;
+	
+	this->int_enable = 0;
+	// RST interrupt_num
+	this->pc = 8 * interrupt_num;
+}
+
 std::string c8080::get_state(){
 	char buffer[100];
 	sprintf(buffer, "A: %02X BC: %04X DE: %04X HL: %04X\n", this->a, (this->b << 8) | this->c, (this->d << 8) | this->e, (this->h << 8) | this->l);
@@ -58,6 +69,10 @@ void c8080::cycle(){
 			this->c = mem[pc+1];
 			pc += 2;
 			break;
+		case 0x03: // INX B
+			this->b = ((((this->b << 8) | this->c) + 1) & 0xFF00) >> 8;
+			this->c = (((this->b << 8) | this->c) + 1) & 0x00FF;
+			break;
 		case 0x06: this->b = mem[pc+1];pc += 1;break; // MVI B, D8
 		case 0x05: // DCR B
 		{
@@ -76,6 +91,7 @@ void c8080::cycle(){
 			this->l = (ans & 0x00FF);
 			break;
 		}
+		case 0x0A: this->a = mem[(this->b << 8) | this->c]; break; // LDAX B
 		case 0x0D: // DCR C
 		{
 			uint16_t ans = this->c - 1; 
@@ -150,6 +166,16 @@ void c8080::cycle(){
 			write_mem((this->h << 8) | this->l, mem[pc+1]);
 			pc += 1;
 			break;
+		case 0x35: // DCR M
+		{
+			uint16_t ans = mem[(this->h << 8) | this->l] - 1; 
+			this->cc.z = ((ans & 0xFF) == 0);
+			this->cc.s = ((ans & 0x80) >> 7 == 1);
+			this->cc.p = ((ans & 0x01) == 0);
+			write_mem((this->h << 8) | this->l , ans & 0xFF);
+			break;
+		}
+		case 0x37: this->cc.cy = 1; break;// STC
 		case 0x39: // DAD SP
 		{	
 			uint32_t ans = ((this->h << 8) | this->l) + sp;
@@ -175,9 +201,12 @@ void c8080::cycle(){
 		case 0x46: this->b = mem[(this->h << 8) | this->l]; break; // MOV B, M
 		case 0x4F: this->c = this->a; break; // MOV C, A
 		case 0x56: this->d = mem[(this->h << 8) | this->l]; break; // MOV D, M
+		case 0x57: this->d = this->a; break; // MOV D, A
 		case 0x5C: this->e = this->h; break; // MOV E, H
 		case 0x5E: this->e = mem[(this->h << 8) | this->l]; break; // MOV E, M
+		case 0x5F: this->e = this->a; break; // MOV E, A
 		case 0x66: this->h = mem[(this->h << 8) | this->l]; break; // MOV H, M
+		case 0x67: this->h = this->a; break; // MOV H, A
 		case 0x6F: this->l = this->a; break; // MOV L, A
 		case 0x77: // MOV M, A 
 			write_mem((this->h << 8) | this->l, this->a);
@@ -240,7 +269,7 @@ void c8080::cycle(){
 			break;
 		case 0xCA: // JZ adr
 			if(this->cc.z)
-				pc = (mem[pc+2] << 8) | mem[pc+1];
+				pc = ((mem[pc+2] << 8) | mem[pc+1]) - 1;
 			else
 				pc += 2;
 			break;
@@ -248,6 +277,7 @@ void c8080::cycle(){
 			write_mem(sp-1, ((pc+2) & 0xFF00) >> 8);
 			write_mem(sp-2, ((pc+2) & 0x00FF));
 			sp = sp - 2;
+			printf("%04X\n", (mem[pc+2] << 8) | mem[pc+1]);
 			pc = ((mem[pc+2] << 8) | mem[pc+1]) - 1;
 			break;
 		case 0xD0: // RNC
@@ -261,11 +291,22 @@ void c8080::cycle(){
 			this->d = mem[sp+1];
 			sp += 2;
 			break;
-		case 0xD3: pc+=1; break; // OUT D8 TODO
 		case 0xD5: // PUSH D
 			write_mem(sp-2, this->e);
 			write_mem(sp-1, this->d);
 			sp -= 2;
+			break;
+		case 0xD8: // RC
+			if(this->cc.cy){
+				pc = (mem[sp+1] << 8) | mem[sp];
+				sp += 2;
+			}
+			break;
+		case 0xDA: // JC adr
+			if(this->cc.cy)
+				pc = ((mem[pc+2] << 8) | mem[pc+1]) - 1;
+			else
+				pc += 2;
 			break;
 		case 0xE1: // POP H
 			this->l = mem[sp];

@@ -4,6 +4,7 @@
 #include <vector>
 #include <cstdint>
 #include <SDL2/SDL.h>
+#include <chrono>
 
 #include "8080.hpp"
 #include "8080disas.hpp"
@@ -25,6 +26,7 @@ uint8_t shift_offset = 0x00;
 void execute(const std::vector<uint8_t> &code);
 void machine_IN(c8080 &chip, int port, uint8_t input);
 void machine_OUT(const c8080 &chip, int port);
+double time();
 
 int main(int argc, char* argv[]){
 	
@@ -78,7 +80,6 @@ int main(int argc, char* argv[]){
 	return 0;
 }
 
-
 void execute(const std::vector<uint8_t> &code){
 	
 	// SDL setup
@@ -96,10 +97,10 @@ void execute(const std::vector<uint8_t> &code){
 	
 	c8080 chip(code);
 	bool running = true;
+	double last_int = time();
 	while(running){
 		
 		uint8_t input = 0;
-
 		// Get input
 		while(SDL_PollEvent(&e) != 0){
 			switch(e.type){
@@ -150,13 +151,22 @@ void execute(const std::vector<uint8_t> &code){
 				chip.cycle();
 			}
 		}
+		
+		// Interrupt
+		if((time() - last_int > 1.0/60.0) && (chip.int_enable)){
+			printf("INTERRUPT!!! Elapsed time: %f\n", time() - last_int);
+			chip.gen_interrupt(2);
+			last_int = time();
+		}
 
 		// Draw screen
 		// TODO: Draw screen
+		/*
 		SDL_UpdateTexture(texture, NULL, pixels, SCREEN_W*sizeof(uint32_t));
 		SDL_RenderClear(renderer);
 		SDL_RenderCopy(renderer, texture, NULL, NULL);
 		SDL_RenderPresent(renderer);
+		*/
 	}
 
 	
@@ -193,3 +203,6 @@ void machine_OUT(const c8080 &chip, int port){
 	}
 }
 
+double time(){
+	return static_cast<double>(std::chrono::system_clock::now().time_since_epoch().count())/1000000000;
+}
