@@ -10,7 +10,14 @@
 // Debug mode
 bool DEBUG = false;
 
-void execute(const std::vector<uint8_t>& code);
+// Shift resister
+uint16_t shift_register = 0x0000;
+uint8_t shift_offset = 0x00;
+
+// Functions
+void execute(const std::vector<uint8_t> &code);
+void machine_IN(c8080 &chip, int port);
+void machine_OUT(const c8080 &chip, int port);
 
 int main(int argc, char* argv[]){
 	
@@ -64,20 +71,51 @@ int main(int argc, char* argv[]){
 }
 
 
-void execute(const std::vector<uint8_t>& code){
+void execute(const std::vector<uint8_t> &code){
 	c8080 chip(code);
 	bool running = true;
 	while(running){
-		if(DEBUG){
-			int itt = 0;
-			printf(chip.get_state().c_str());
-			printf("Iterations: ");
-			scanf("%d", &itt);
-			for(int i = 0; i < itt; ++i){
+		uint8_t op = chip.memory[chip.pc];
+		if(op == 0xDB){ // IN
+			uint8_t port = chip.memory[chip.pc + 1];
+			machine_IN(chip, port);
+			chip.pc += 2;
+		}else if(op == 0xD3){ // OUT
+			uint8_t port = chip.memory[chip.pc + 1];
+			machine_OUT(chip, port);
+			chip.pc += 2;
+		}else{
+			if(DEBUG){
+				// Debugging
+				int itt = 0;
+				printf("%sIterations: ", chip.get_state().c_str());
+				scanf("%d", &itt);
+				for(int i = 0; i < itt; ++i){
+					chip.cycle();
+				}
+			}else{
 				chip.cycle();
 			}
-		}else{
-			chip.cycle();
 		}
 	}
 }
+
+void machine_IN(c8080 &chip, int port){
+	switch(port){
+		case 3:
+			chip.a = (shift_register >> (8-shift_offset)) & 0xFF;
+			break;
+	}
+}
+
+void machine_OUT(const c8080 &chip, int port){
+	switch(port){
+		case 2:
+			shift_offset = chip.a & 0x7;
+			break;
+		case 4:
+			shift_register = ((chip.a << 8) & 0xFF00) | ((shift_register >> 8) & 0xFF);
+			break;
+	}
+}
+

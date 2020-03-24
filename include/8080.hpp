@@ -7,7 +7,7 @@
 
 // A class for the 8080 chip
 class c8080{
-	private:
+	public:
 		// State
 		uint8_t a;
 		uint8_t b;
@@ -28,7 +28,7 @@ class c8080{
 		} cc;
 		uint8_t int_enable;
 	
-	public:
+	//public:
 		void cycle();
 		void write_mem(uint16_t addr, uint8_t val);
 		std::string get_state();
