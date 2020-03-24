@@ -15,8 +15,8 @@ bool DEBUG = false;
 
 
 // Screen size
-const int SCREEN_W = 640;
-const int SCREEN_H = 480;
+const int SCREEN_W = 224;
+const int SCREEN_H = 256;
 
 // Shift resister
 uint16_t shift_register = 0x0000;
@@ -155,18 +155,32 @@ void execute(const std::vector<uint8_t> &code){
 		// Interrupt
 		if((time() - last_int > 1.0/60.0) && (chip.int_enable)){
 			printf("INTERRUPT!!! Elapsed time: %f\n", time() - last_int);
+			// Draw screen
+			
+			for(int i = 0; i < SCREEN_W; ++i){
+				for(int j = 0; j < SCREEN_H; j += 8){
+					uint8_t pix = chip.memory[0x2400 + (i*SCREEN_H + j)/8];
+					for(int p = 0; p < 8; ++p){
+						if((pix & (1<<p)) != 0){
+							pixels[(SCREEN_H-1-j)*(SCREEN_W) + i - SCREEN_W*p] = 0x00FFFFFF;
+						}else{
+							pixels[(SCREEN_H-1-j)*(SCREEN_W) + i - SCREEN_W*p] = 0x00000000;
+						}
+					}
+				}
+			}
+
+
+			SDL_UpdateTexture(texture, NULL, pixels, SCREEN_W*sizeof(uint32_t));
+			SDL_RenderClear(renderer);
+			SDL_RenderCopy(renderer, texture, NULL, NULL);
+			SDL_RenderPresent(renderer);
+			
 			chip.gen_interrupt(2);
+			//SDL_Delay(500);
 			last_int = time();
 		}
 
-		// Draw screen
-		// TODO: Draw screen
-		/*
-		SDL_UpdateTexture(texture, NULL, pixels, SCREEN_W*sizeof(uint32_t));
-		SDL_RenderClear(renderer);
-		SDL_RenderCopy(renderer, texture, NULL, NULL);
-		SDL_RenderPresent(renderer);
-		*/
 	}
 
 	
