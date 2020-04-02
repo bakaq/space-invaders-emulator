@@ -94,12 +94,13 @@ void execute(const std::vector<uint8_t> &code){
 	SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 	texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, SCREEN_W, SCREEN_H);
 	SDL_Event e;
-	
+
+
 	c8080 chip(code);
-	bool running = true;
 	double last_int = time();
-	while(running){
-		
+	double last_comp = time();
+	bool running = true;
+	while(running){	
 		uint8_t input = 0;
 		// Get input
 		while(SDL_PollEvent(&e) != 0){
@@ -128,27 +129,41 @@ void execute(const std::vector<uint8_t> &code){
 			}
 		}
 		
-		// Emulate cycle
-		uint8_t op = chip.memory[chip.pc];
-		if(op == 0xDB){ // IN
-			uint8_t port = chip.memory[chip.pc + 1];
-			machine_IN(chip, port, input);
-			chip.pc += 2;
-		}else if(op == 0xD3){ // OUT
-			uint8_t port = chip.memory[chip.pc + 1];
-			machine_OUT(chip, port);
-			chip.pc += 2;
-		}else{
-			if(DEBUG){
-				// Debugging
-				int itt = 0;
-				printf("%sIterations: ", chip.get_state().c_str());
-				scanf("%d", &itt);
-				for(int i = 0; i < itt; ++i){
-					chip.cycle();
-				}
+		// Emulate cycles
+		int cycles = 0;
+		int cycles_to_compute = static_cast<int>((time() - last_comp)*2000000);
+		while(cycles < cycles_to_compute){
+			printf("Cycles to compute: %d\n", cycles_to_compute);
+			uint8_t op = chip.memory[chip.pc];
+			if(op == 0xDB){ // IN
+				uint8_t port = chip.memory[chip.pc + 1];
+				machine_IN(chip, port, input);
+				chip.pc += 2;
+			}else if(op == 0xD3){ // OUT
+				uint8_t port = chip.memory[chip.pc + 1];
+				machine_OUT(chip, port);
+				chip.pc += 2;
 			}else{
-				chip.cycle();
+				if(DEBUG){
+					// Debugging
+					int itt = 0;
+					printf("%sIterations: ", chip.get_state().c_str());
+					scanf("%d", &itt);
+					for(int i = 0; i < itt; ++i){
+						cycles += chip.cycle();
+					}
+				}else{
+					cycles += chip.cycle();
+				}
+			}
+			printf("Cycles: %d\n", cycles);
+		}
+		if(cycles > 0){
+			if(cycles > cycles_to_compute){
+				// Carries the excess
+				last_comp = time() + (cycles-cycles_to_compute)/2000000;
+			}else{
+				last_comp = time();
 			}
 		}
 		
@@ -177,7 +192,6 @@ void execute(const std::vector<uint8_t> &code){
 			SDL_RenderPresent(renderer);
 			
 			chip.gen_interrupt(2);
-			//SDL_Delay(500);
 			last_int = time();
 		}
 

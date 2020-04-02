@@ -29,7 +29,7 @@ class c8080{
 		uint8_t int_enable;
 	
 	//public:
-		void cycle();
+		uint8_t cycle();
 		void write_mem(uint16_t addr, uint8_t val);
 		void gen_interrupt(int interrupt_num);
 		std::string get_state();
